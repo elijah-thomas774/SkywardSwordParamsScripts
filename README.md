@@ -1,4 +1,4 @@
-# SkywardSwordParamsScripts
+# Skyward Sword Param Parser
 contains my *really* unoptimized and rough code for simple parameter parsing based on json stage outputs xD
 
 The JSON library used is the nlohmann json library. This can be found on [This Github Page](https://github.com/nlohmann/json)
