@@ -8,6 +8,9 @@ The json files read are produced by the [Skyward Sword Tools Repo](https://githu
 I think due to the use of Filesystem, it requires at least c++ 17.
 I compiled using g++
 
+example: `g++ convertFlag.cpp` as converFlag.cpp is the main file
+
+
 # Usage
 `[compiled binary] ALL -n [ObjName] -f [bitfied name] -m [Param Mask] -s [Param Shift] -t [type option (see below)]`
 
