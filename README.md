@@ -29,4 +29,5 @@ Adding a sort value can be made. this is to make quick refernce to same typed th
 `-sort [value]`
 
 This can also be used to parse generic HEX strings. Pass in `-i [Hex String]`. NOTE: `ALL` command overwrites this.
+
 example: `-i 0xFABFFFFF -m 0xFF -s 20` will have an ouput of `0xAB`
