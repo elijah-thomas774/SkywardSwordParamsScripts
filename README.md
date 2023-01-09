@@ -4,6 +4,9 @@ contains my *really* unoptimized and rough code for simple parameter parsing bas
 The JSON library used is the nlohmann json library. This can be found on [This Github Page](https://github.com/nlohmann/json)
 
 The json files read are produced by the [Skyward Sword Tools Repo](https://github.com/lepelog/skywardsword-tools) (the output path to read the stage files is a hard coded thing xD - like i said, rough)
+# Building
+I think due to the use of Filesystem, it requires at least c++ 17.
+I compiled using g++
 
 # Usage
 `[compiled binary] ALL -n [ObjName] -f [bitfied name] -m [Param Mask] -s [Param Shift] -t [type option (see below)]`
