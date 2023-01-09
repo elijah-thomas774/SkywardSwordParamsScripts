@@ -15,7 +15,7 @@ ObjNames just reference the 'name' field in the output - case sensitive
 type options are 
   `scene` for scene flag 
   `story` for story flag (JP last 3 Hex digits)
-  `item'  for item types (not full list yet)
+  `item`  for item types (not full list yet)
   'point' if this is a specification for a point, it will grab the postion of it. Not fully supported with shifted indecies based on PATH
   'custom' This is used to match values to see patterns. `-t custom 4 [name_0] [name_1] [name_2] [name_3]` This is not smart processing, but it works for a tool xD
 adding a sort value can be made. this is to make quick refernce to same typed things that can be looked at on the object map for helping find use
