@@ -58,7 +58,7 @@ void printExtraInfo(
 
 void decodeFile(int mask, int shift, std::string field, std::string objName, std::string type_info)
 {  
-    std::string path = "C:\\Users\\elija\\Documents\\GitHub\\skywardsword-tools\\output\\stage\\";
+    std::string path = "/home/elijah/Documents/ssr/sstools/skywardsword-tools/output/stage/";
     for (const auto &entry : fs::directory_iterator(path))
     {
         // std::cout << entry.path() << std::endl;
