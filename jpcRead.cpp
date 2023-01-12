@@ -16,26 +16,44 @@ typedef float    f32;
 typedef double   f64;
 typedef vector<u8> data_t;
 
-
-// const enum BLOCK_MAGIC{
-//     BEM1 = 0x42454D3100,
-//     BSP1 =,
-//     ESP1 =,
-//     ETX1 =,
-//     SSP1 =,
-//     FLD1 =,
-//     KFA1 =,
-//     TDB1 =,
-//     TEX1 =,
-// };
 struct BTI_header {
-    u8 format;
-    u8 enAlpha;
-    u16 width;
-    u16 height;
-
+   /* 0x00 */ u8  format;
+   /* 0x01 */ u8  enAlpha;
+   /* 0x02 */ u16 width;
+   /* 0x04 */ u16 height;
+   /* 0x06 */ u8  wrapS;
+   /* 0x07 */ u8  wrapT;
+   /* 0x08 */ u16 palletFormat;
+   /* 0x0A */ u16 numPalletEntries;
+   /* 0x0C */ u32 palletDataOffset;
+   /* 0x10 */ u32 unk1;
+   /* 0x14 */ u8  magnificationFilterType;
+   /* 0x15 */ u8  minificationFilterType;
+   /* 0x16 */ u16 unk2;
+   /* 0x18 */ u8  totalNumberOfImages;
+   /* 0x19 */ u8  unk3;
+   /* 0x1A */ u16 unk4;
+   /* 0x1C */ u32 imageDataOffset;            
 };
 
+string TEX_FORMATS[] {
+    "I4",
+    "I8",
+    "IA4",
+    "IA8",
+    "RGB565",
+    "RGB5A3",
+    "RGBA8",
+    "77",
+    "C4",
+    "C8",
+    "C14X2",
+    "bb",
+    "cc",
+    "dd",
+    "CMPR",
+    "ff",
+};
 struct JPAResourceRaw {
     u16 resourceId;
     data_t data;
@@ -176,11 +194,12 @@ void readFileStuff(const u8* jpcMem)
         {
             texture_data[j-0x20] = jpcMem[texture_table_index+j];
         }
-        cout << texture_name << endl;
-        ofstream tOut;
-        tOut.open("./output/" + texture_name + ".bti", ios::binary | ios::out);
-        tOut.write(texture_data, blocksize-0x20);
-        tOut.close();
+        // // The following Code Writes the data to an output folder 
+        // ofstream tOut;
+        // tOut.open("./output/" + texture_name + ".bti", ios::binary | ios::out);
+        // tOut.write(texture_data, blocksize-0x20);
+        // tOut.close();
+        printf("Texture format: 0x%X %20s (%s)\n", (u8)texture_data[0], texture_name.c_str(), TEX_FORMATS[texture_data[0]].c_str());
         delete[] texture_data;
         texture_table_index += blocksize;
     }
