@@ -33,3 +33,7 @@
 
 # folder
 output/*
+input/*
+
+# SS Files:
+*.jpc
