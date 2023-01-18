@@ -1,7 +1,11 @@
 # JPA reader
 
-Almost all of jpcRead.cpp actual working is credit to Jasper at [Noclip.website's github](https://github.com/magcius/noclip.website/blob/d7dd9e7212792ad4454cd00d2bdabc2ce78fea07/src/Common/JSYSTEM/JPA.ts#L4983). Used with permission with the goal of just editing textures in the end.
+Almost all of jpcToJson.cpp actual working is credit to Jasper at [Noclip.website's github](https://github.com/magcius/noclip.website/blob/d7dd9e7212792ad4454cd00d2bdabc2ce78fea07/src/Common/JSYSTEM/JPA.ts#L4983). Used with permission with the goal of just editing textures in the end.
 This is not to be used as a complete file reader, the goal will just to change some colors and possible textures. Provide your own jpc file as this repo will not distribute any of the games files.
+
+use: `g++ jpcToJson.cpp -o toJson`
+
+then: `toJson -i [jpc File]`
 
 ## Skyward Sword Param Parser
 
