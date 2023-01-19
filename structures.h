@@ -7,7 +7,9 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include "json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 // most if not all are copies of https://github.com/magcius/noclip.website/blob/d7dd9e7212792ad4454cd00d2bdabc2ce78fea07/src/Common/JSYSTEM/JPA.ts#L4425
 // Used with Permission from owner
@@ -23,32 +25,12 @@ typedef int64_t  i64;
 
 typedef float    f32;
 typedef double   f64;
-
-struct vec3f {
-    f32 x, y, z;
-};
-struct BTI_header {
-   /* 0x00 */ u8  format;
-   /* 0x01 */ u8  enAlpha;
-   /* 0x02 */ u16 width;
-   /* 0x04 */ u16 height;
-   /* 0x06 */ u8  wrapS;
-   /* 0x07 */ u8  wrapT;
-   /* 0x08 */ u16 palletFormat;
-   /* 0x0A */ u16 numPalletEntries;
-   /* 0x0C */ u32 palletDataOffset;
-   /* 0x10 */ u32 unk1;
-   /* 0x14 */ u8  magnificationFilterType;
-   /* 0x15 */ u8  minificationFilterType;
-   /* 0x16 */ u16 unk2;
-   /* 0x18 */ u8  totalNumberOfImages;
-   /* 0x19 */ u8  unk3;
-   /* 0x1A */ u16 unk4;
-};
+typedef vector<f32> vec3f;
 
 struct Color {
     u8 r,g,b,a;
 };
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Color, r, g, b, a);
 
 class DataBuffer {
     public:
@@ -228,7 +210,6 @@ string DataBuffer::read_string(i32 offset, i32 n, bool stopOnNull){
     }
     return str;
 }
-
 vector<u8>  DataBuffer::read_u8_vec(i32 offset, i32 n){
     vector<u8> vecData(n);
     if (checkOffset(offset, n*sizeof(u8)))
@@ -305,6 +286,150 @@ vector<f32> DataBuffer::read_f32_vec(i32 offset, i32 n){
     }
     return vecData;
 }
+
+struct BTI_header {
+   /* 0x00 */ u8  format;
+   /* 0x01 */ u8  enAlpha;
+   /* 0x02 */ u16 width;
+   /* 0x04 */ u16 height;
+   /* 0x06 */ u8  wrapS;
+   /* 0x07 */ u8  wrapT;
+   /* 0x08 */ u16 palletFormat;
+   /* 0x0A */ u16 numPalletEntries;
+   /* 0x0C */ u32 palletDataOffset;
+   /* 0x10 */ u32 unk1;
+   /* 0x14 */ u8  magnificationFilterType;
+   /* 0x15 */ u8  minificationFilterType;
+   /* 0x16 */ u16 unk2;
+   /* 0x18 */ u8  totalNumberOfImages;
+   /* 0x19 */ u8  unk3;
+   /* 0x1A */ u16 unk4;
+};
+
+// https://github.com/magcius/noclip.website/blob/5644a8b71f7a8ca28cbb2e027069c4ea85ca211d/src/Common/JSYSTEM/JPA.ts#L4450
+// JPA Dynamics Block
+// Emitter settings and details on how it simulates 
+// commented out fields are not present in JPAC2, left in, but commented to add support later if i decide to
+  
+class JPA_BEM1 { 
+    public:
+    u32 emitFlags;
+    u8 volumeType;
+    vec3f emitterScl;
+    vec3f emitterRot; // in degrees
+    vec3f emitterTrs;
+    vec3f emitterDir;
+
+    f32 initialVelOmni;
+    f32 initialVelAxis;
+    f32 initialVelRndm;
+    f32 initialVelDir; 
+
+    f32 spread;
+    f32 initialVelRatio;
+    f32 rate;
+    f32 rateRndm;
+    f32 lifeTimeRndm;
+    f32 volumeSweep;
+    f32 volumeMinRad;
+    f32 airResist;
+    // u32 airResistRndm;
+    f32 moment; // will always be 1? (based on comment in Japsers code)
+    u32 momentRndm;
+    // u32 accel;
+    // u32 accelRndm;
+    i16 maxFrame;
+    i16 startFrame;
+    i16 lifeTime;
+    i16 volumeSize;
+    i16 divNumber;
+    u8 rateStep;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_BEM1, emitFlags, volumeType, emitterScl, emitterRot, emitterTrs, emitterDir, initialVelOmni, initialVelAxis, initialVelRndm, initialVelDir,  spread, initialVelRatio, rate, rateRndm, lifeTimeRndm, volumeSweep, volumeMinRad, airResist, moment, momentRndm, maxFrame, startFrame, lifeTime, volumeSize, divNumber, rateStep);
+
+// https://github.com/magcius/noclip.website/blob/5644a8b71f7a8ca28cbb2e027069c4ea85ca211d/src/Common/JSYSTEM/JPA.ts#L4514
+// JPA Base Shape 
+// Particle Draw Settings
+struct JPA_BSP1 {
+    // u32 flags; // Controls some commented out options TODO
+    u8 shapeType;
+    u8 dirType;
+    u8 rotType;
+    u8 planeType;
+    vector<f32> baseSize;
+    f32 tilingS;
+    f32 tilingT;
+    bool isDrawFwdAhead;
+    bool isDrawPrntAhead;
+    bool isNoDrawParent;
+    bool isNoDrawChild;
+
+    // TEV/PE Settings
+    u8 colorInSelect;
+    u8 alphaInSelect;
+    u16 blendModeFlags;
+    u8 alphaCompareFlags;
+    u8 alphaRef0;
+    u8 alphaRef1;
+    u8 zModeFlags;
+
+    u8 anmRndm;
+
+    // Texture Palette Animation
+    // bool isEnableTexture;
+    bool isGlblTexAnm;
+    u8 texCalcIdxType;
+    u8 texIdx;
+    vector<u8> texIdxAnimData;
+    u8 texIdxLoopOfstMask;
+
+    // Texture Coordinate Animation
+    bool isEnableProjection;
+    bool isEnableTexScrollAnm;
+
+    f32 texInitTransX;
+    f32 texInitTransY;
+    f32 texInitScaleX;
+    f32 texInitScaleY;
+    f32 texInitRot;
+    f32 texIncTransX;
+    f32 texIncTransY;
+    f32 texIncScaleX;
+    f32 texIncScaleY;
+    f32 texIncRot;
+
+    // Color Animation Settings
+    bool isGlblClrAnm;
+    u8 colorCalcIdxType;
+    Color colorPrm;
+    Color colorEnv;
+    vector<pair<u16, Color>> colorPrmAnimData;
+    vector<pair<u16, Color>> colorEnvAnimData;
+    u16 colorAnimMaxFrm;
+    u8 colorLoopOfstMask;
+
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_BSP1, shapeType, dirType, rotType, planeType, baseSize, tilingS, tilingT, isDrawFwdAhead, isDrawPrntAhead, isNoDrawParent, isNoDrawChild, colorInSelect, alphaInSelect, blendModeFlags, alphaCompareFlags, alphaRef0, alphaRef1, zModeFlags, anmRndm, isGlblTexAnm, texCalcIdxType, texIdx, texIdxAnimData, texIdxLoopOfstMask, isEnableProjection, isEnableTexScrollAnm, texInitTransX, texInitTransY, texInitScaleX, texInitScaleY, texInitRot, texIncTransX, texIncTransY, texIncScaleX, texIncScaleY, texIncRot, isGlblClrAnm, colorCalcIdxType, colorPrm, colorEnv, colorPrmAnimData, colorEnvAnimData, colorAnimMaxFrm, colorLoopOfstMask);
+
+struct JPA_ESP1 {
+
+};
+struct JPA_ETX1 {
+
+};
+struct JPA_SSP1 {
+
+};
+struct JPA_FLD1 {
+
+};
+struct JPA_KFA1 {
+
+};
+struct JPA_TDB1 {
+
+};
+
 struct JPA_ResourceRaw {
     u16 resourceId;
     DataBuffer data; 
@@ -322,8 +447,8 @@ struct JPA_Resource {
     u8 keyBlockCount;
     u8 tdb1Count;
 
-    vector<u8> bem1; // Dynamics Block
-    vector<u8> bsp1; // Base Shape Block
+    vector<JPA_BEM1> bem1; // Dynamics Block
+    vector<JPA_BSP1> bsp1; // Base Shape Block
     vector<u8> esp1; // Extra Shape Block
     vector<u8> etx1; // Extra Texture Block
     vector<u8> ssp1; // Child Shape Block
