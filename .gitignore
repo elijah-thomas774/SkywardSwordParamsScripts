@@ -37,3 +37,9 @@ input/*
 
 # SS Files:
 *.jpc
+*.json
+toJson
+test
+temp.txt
+readJpc
+TextureInput/*
