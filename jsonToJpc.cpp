@@ -210,20 +210,21 @@ vector<u8> build_bsp1_JPAC_11(JPA_BSP1& bsp1)
     flags |= ((bsp1.dirType                & 0x7) << 4);
     flags |= ((bsp1.rotType                & 0x7) << 7);
     flags |= ((bsp1.planeType              & 0x1) << 10);
-    flags |= ((bsp1.tilingS == 2.0       ? 1 : 0) << 0x1B);
-    flags |= ((bsp1.tilingT == 2.0       ? 1 : 0) << 0x1C);
-    flags |= ((bsp1.origFlags & 0x00180000)); // These are the unk flags
+    flags |= ((bsp1.tilingS > 1.5 ? 1 : 0) << 27);
+    flags |= ((bsp1.tilingT > 1.5 ? 1 : 0) << 28);
+    flags |= ((bsp1.origFlags & 0x02382800)); // These are the unk flags
     flags |= ((bsp1.isNoDrawParent       ? 1 : 0) << 29);
     flags |= ((bsp1.isNoDrawChild        ? 1 : 0) << 30);
-    flags |= ((bsp1.colorInSelect          & 0x7) << 0xF);
-    flags |= ((bsp1.alphaInSelect          & 0x1) << 0x12);
+    flags |= ((bsp1.colorInSelect          & 0x7) << 15);
+    flags |= ((bsp1.alphaInSelect          & 0x1) << 18);
     flags |= ((bsp1.isEnableTexScrollAnm ? 1 : 0) << 26);
     flags |= ((bsp1.isDrawFwdAhead       ? 1 : 0) << 23);
     flags |= ((bsp1.isDrawPrntAhead      ? 1 : 0) << 24);
     flags |= ((bsp1.isEnableProjection   ? 1 : 0) << 22);
     flags |= ((bsp1.isGlblTexAnm         ? 1 : 0) << 14);
     flags |= ((bsp1.isGlblClrAnm         ? 1 : 0) << 12);
-    flags |= ((bsp1.origFlags & 0x02000000));
+    // flags |= ((bsp1.origFlags & 0x02000000));
+
     block.add_u32(flags);
     block.add_u32(0x00); // To be filled later
     block.add_f32_arr(bsp1.baseSize);
@@ -257,7 +258,7 @@ vector<u8> build_bsp1_JPAC_11(JPA_BSP1& bsp1)
     if (bsp1.isEnableTexScrollAnm)
     {
         block.add_f32(bsp1.texInitTransX);
-        block.add_f32(bsp1.texIncTransY);
+        block.add_f32(bsp1.texInitTransY);
         block.add_f32(bsp1.texInitScaleX);
         block.add_f32(bsp1.texInitScaleY);
         block.add_f32(bsp1.texInitRot);
@@ -317,6 +318,7 @@ vector<u8> build_esp1(JPA_ESP1& esp1)
     flags |= ((esp1.scaleAnmTypeY & 0x3) << 0xA);
     flags |= ((esp1.pivotX & 0x3) << 0xC);
     flags |= ((esp1.pivotY & 0x3) << 0xE);
+    flags |= ((esp1.origFlags & 0xFEFC00FC));
     block.add_u32(flags);
     block.add_f32(esp1.scaleInTiming);
     block.add_f32(esp1.scaleOutTiming);
@@ -352,7 +354,7 @@ vector<u8> build_ssp1(JPA_SSP1& ssp1)
     u32 flags = 0;
     flags |= (ssp1.shapeType & 0xF);
     flags |= ((ssp1.dirType & 0x7) << 4);
-    flags |= ((ssp1.dirType & 0x7) << 7);
+    flags |= ((ssp1.rotType & 0x7) << 7);
     flags |= ((ssp1.planeType & 0x1) << 10);
     flags |= ((ssp1.isEnableRotate ? 0x1 : 0x0) << 24);
     flags |= ((ssp1.isEnableAlphaOut ? 0x1 : 0x0) << 23);
@@ -361,6 +363,7 @@ vector<u8> build_ssp1(JPA_SSP1& ssp1)
     flags |= ((ssp1.isInheritedRGB ? 0x1 : 0x0) << 18);
     flags |= ((ssp1.isInheritedAlpha ? 0x1 : 0x0) << 17);
     flags |= ((ssp1.isInheritedScale ? 0x1 : 0x0) << 16);
+    flags |= ((ssp1.origFlags & 0x00180800));
     block.add_u32(flags);
     block.add_f32(ssp1.posRndm);
     block.add_f32(ssp1.baseVel);
@@ -490,7 +493,7 @@ vector<u8> build_resource(JPA_Resource& resource)
     espNum = resource.esp1.size(); 
     etxNum = resource.etx1.size(); 
     tdbNum = resource.tdb1.size();
-    u16 block_count = bemNum+fldNum+kfaNum+bspNum+sspNum+sspNum+espNum+etxNum+1;
+    u16 block_count = 1+fldNum+kfaNum+1+sspNum+espNum+etxNum+1;
     block.add_u16(block_count);
     block.add_u8(fldNum);
     block.add_u8(kfaNum);
@@ -534,19 +537,12 @@ vector<u8> build_jpc(JPAC& jpac)
 {
     // first 16 bytes is Verision | resource count | tex offset
     Buffer file;
-    file.add_u32('JPAC');
-    if (jpac.version.at(7) == '1')
+    string version = jpac.version;
+    for (int i = 0; i < 8; i++)
     {
-        file.add_u32('2_11');
+        file.add_i8(version.at(i));
     }
-    else if (jpac.version.at(7) == '0')
-    {
-        file.add_u32('2_10');
-    }
-    else 
-    {
-        assert(!"Non Compatible Verison");
-    }
+    // cout << jpac.resources.size() << endl;
     file.add_u16(jpac.resources.size());
     file.add_u16(jpac.textures.size());
     file.add_u32(0);
@@ -558,7 +554,7 @@ vector<u8> build_jpc(JPAC& jpac)
     {
         file.add_padding(16 - file.buffer.size()%16);
     }
-    u16 currEnd = file.buffer.size();
+    u32 currEnd = file.buffer.size();
     file.buffer.at(0xC) = (currEnd >> 24) & 0xFF;
     file.buffer.at(0xD) = (currEnd >> 16) & 0xFF;
     file.buffer.at(0xE) = (currEnd >> 8) & 0xFF;
@@ -566,7 +562,8 @@ vector<u8> build_jpc(JPAC& jpac)
 
     for (auto& textures : jpac.textures)
     {
-        string name = "./TextureInput/" + textures.name;
+        string name = ".\\TextureInput\\" + textures.name;
+        name.append(".bti");
         ifstream jpcFile(name, ios::binary | ios::in | ios::ate);
         vector<u8> data;
         if(jpcFile.is_open())
@@ -604,7 +601,7 @@ int main()
 
     vector<u8> file = build_jpc(allResources);
     
-    ofstream output("Common.jpc");
+    ofstream output("Common.jpc", ios::binary | ios::out);
     if (output.is_open())
     {
         output.write((char*)&file[0], file.size());

@@ -41,65 +41,6 @@ u32 gflags = 0xFFFFFFFF;
 vector<blockData> bspBlocks;
 vector<u32> flagCommon;
 u32 allFlag = 0;
-void print_block_data(DataBuffer &data, int resourceId, int offset)
-{
-    blockData block;
-    char resId[8];
-    char dataOff[12];
-    sprintf(resId, "0x %-4X", resourceId);
-    sprintf(dataOff, "0x %-8X", offset+8);
-    block.block_offset = dataOff;
-    block.resource_id = resId;
-    // char flagsStr[5];
-    u32 flags = data.read_u8(0x1E);
-    bool addin = true;
-    for(u32 temp : flagCommon)
-    {
-        if (temp == (flags))
-            addin = false;
-
-    }
-    if (addin) flagCommon.push_back(flags);
-    // if (addin) cout << "ResId: " << dec << setw(4) << resourceId << " | " << hex << setw(8) << setfill('0') << (flags) << endl;
-    // sprintf(flagsStr, "%04X", flags);
-    // u32 colorPrmLen = 6 * data.read_u8(0x22);
-    // u32 colorEnvLen = 6 * data.read_u8(0x23);
-    // u32 prmOff = data.read_u16(0x0C);
-    // u32 envOff = data.read_u16(0x0E);
-
-    // prmOff = std::min(prmOff, envOff);
-    u32 texIdAnmCount = data.read_u8(0x1F);
-    // if (texIdAnmCount % 4 != 0)
-    // {
-    //     texIdAnmCount+=(4-(texIdAnmCount % 4));
-    // }
-    // if (
-    //     prmOff == (0x5C) || prmOff == 0x60 || prmOff == 0x64
-    // ){
-    //     // cout << hex << prmOff << endl;
-    //     gflags &= flags;
-    // }
-    // block.flags = (flagsStr);
-    // if (texIdAnmCount == 0)
-        gflags &= flags;
-        allFlag |= flags;
-
-    string dataStr;
-    for (int i = 0; i < data.getSize(); i++)
-    {
-        if (i % 16 == 0 && i != 0)
-        {
-            block.data.push_back(dataStr);
-            dataStr.clear();
-        }
-        char buff[4];
-        sprintf(buff, "%02X ", data.read_u8(i));
-        dataStr.append(buff);
-    }
-    if (dataStr.size() != 0)
-        block.data.push_back(dataStr);
-    bspBlocks.push_back(block);
-}
 JPA_BEM1 parse_bem1(DataBuffer &data);
 JPA_BSP1 parse_bsp1(DataBuffer &data);
 JPA_ESP1 parse_esp1(DataBuffer &data);
@@ -119,13 +60,13 @@ void dump_textures(JPAC &jpc, string file_name)
     {
         string filePath(file_name);
         filePath.append(tex.name);
-        // filePath.append(".bti");
+        filePath.append(".bti");
         char* imgDat = new char[tex.data.getSize()-0x20];
         for (int i = 0; i < (tex.data.getSize()-0x20); i++)
         {
             imgDat[i] = tex.data.read_u8(i+0x20);
         }
-        ofstream img(filePath);
+        ofstream img(filePath, ios::binary | ios::out);
         img.write(imgDat, (tex.data.getSize()-0x20));
         img.close();
         delete[] imgDat;
@@ -203,7 +144,7 @@ JPAC parseJPC(DataBuffer &jpc){
     cout << "effectCnt: " << effectCount << endl;
     cout << "textCnt  : " << textureCount << endl;
     // cout << "tblOffset: 0x" << hex << textureTableOffset << endl;
-    version_type = (string)version.c_str();
+    version_type = version;
     vector<JPA_ResourceRaw> resources_raw;
     i32 currOffset = 0x10;
     for (i32 i = 0; i < effectCount; i++)
@@ -332,7 +273,7 @@ JPA_BEM1 parse_bem1(DataBuffer &data)
     bem1.volumeMinRad     = data.read_f32(0x5C);
     bem1.airResist        = data.read_f32(0x60);
     bem1.momentRndm       = data.read_f32(0x64);
-    bem1.emitterRot     = data.read_i16_vec(0x68, 3);
+    bem1.emitterRot       = data.read_i16_vec(0x68, 3);
     bem1.maxFrame         = data.read_i16(0x6E);
     bem1.startFrame       = data.read_i16(0x70);
     bem1.lifeTime         = data.read_i16(0x72);
@@ -364,8 +305,8 @@ JPA_BSP1 parse_bsp1(DataBuffer &data)
     {
         bsp1.isEnableProjection   = !!(flags & 0x00100000);
         bsp1.isEnableTexScrollAnm = !!(flags & 0x01000000);
-        bsp1.tilingS = !!((flags>>0x19) & 0x19) ? 2.0 : 1.0;
-        bsp1.tilingT = !!((flags>>0x1A) & 0x1A) ? 2.0 : 1.0;
+        bsp1.tilingS = !!((flags>>0x19) & 0x1) ? 2.0 : 1.0;
+        bsp1.tilingT = !!((flags>>0x1A) & 0x1) ? 2.0 : 1.0;
         bsp1.isDrawFwdAhead  = !!(flags & 0x00200000);
         bsp1.isDrawPrntAhead = !!(flags & 0x00400000);
         bsp1.isNoDrawParent  = !!(flags & 0x08000000);
@@ -379,8 +320,8 @@ JPA_BSP1 parse_bsp1(DataBuffer &data)
         // cout << "HERE";
         bsp1.isEnableProjection   = !!(flags & 0x00400000);
         bsp1.isEnableTexScrollAnm = !!(flags & 0x04000000);
-        bsp1.tilingS = !!((flags>>0x19) & 0x1B) ? 2.0 : 1.0;
-        bsp1.tilingT = !!((flags>>0x1A) & 0x1C) ? 2.0 : 1.0;
+        bsp1.tilingS = !!((flags>>0x1B) & 0x1) ? 2.0 : 1.0;
+        bsp1.tilingT = !!((flags>>0x1C) & 0x1) ? 2.0 : 1.0;
         bsp1.isDrawFwdAhead  = !!(flags & 0x00800000);
         bsp1.isDrawPrntAhead = !!(flags & 0x01000000);
         bsp1.isNoDrawParent  = !!(flags & 0x20000000);
@@ -441,7 +382,7 @@ JPA_BSP1 parse_bsp1(DataBuffer &data)
     u8 colorFlags = data.read_u8(0x21);
     bsp1.colorFlags = colorFlags;
     bsp1.colorCalcIdxType = (colorFlags >> 4) & 0x7;
-    bsp1.colorLoopOfstMask = data.read_u8(0x30);
+    bsp1.colorLoopOfstMask = data.read_u8(0x2F);
     bsp1.colorPrm = data.read_color(0x26);
     bsp1.colorEnv = data.read_color(0x2A);
     bsp1.colorAnimMaxFrm = data.read_u16(0x24);
@@ -483,13 +424,14 @@ JPA_ESP1 parse_esp1(DataBuffer &data)
 
     JPA_ESP1 esp1;
     u32 flags = data.read_u32(0x08);
+    esp1.origFlags = flags;
     esp1.isEnableScale = !!(flags & 0x1);
     esp1.isDiffXY = !!(flags & 0x2);
     esp1.scaleAnmTypeX = (flags >> 0x08) & 0x03;
     esp1.scaleAnmTypeY = (flags >> 0x0A) & 0x03;
-    esp1.isEnableRotate = !!(flags & 0x00010000);
-    esp1.isEnableSinWave = !!(flags & 0x0002000);
-    esp1.isEnableAlpha = !!(flags & 0x01000000);
+    esp1.isEnableAlpha  = !!(flags & 0x00010000);
+    esp1.isEnableSinWave = !!(flags & 0x00020000);
+    esp1.isEnableRotate = !!(flags & 0x01000000);
     esp1.pivotX = (flags >> 0x0C) & 0x03;
     esp1.pivotY = (flags >> 0x0E) & 0x03;
     esp1.scaleInTiming = data.read_f32(0xC);
@@ -562,6 +504,7 @@ JPA_SSP1 parse_ssp1(DataBuffer &data)
     }
     JPA_SSP1 ssp1;
     u32 flags = data.read_u32(0x08);
+    ssp1.origFlags = flags;
     ssp1.isInheritedScale = !!(flags & 0x00010000);
     ssp1.isInheritedAlpha = !!(flags & 0x00020000);
     ssp1.isInheritedRGB =   !!(flags & 0x00040000);

@@ -335,7 +335,7 @@ class JPA_BEM1 {
     f32 volumeSweep;
     f32 volumeMinRad;
     f32 airResist;
-    u32 momentRndm;
+    f32 momentRndm;
     i16 maxFrame;
     i16 startFrame;
     i16 lifeTime;
@@ -414,6 +414,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_BSP1, origFlags, texFlags, colorFlags, sh
 
 // Extra Shape Block
 struct JPA_ESP1 {
+    u32 origFlags;
     bool isEnableScale;
     bool isDiffXY;
     u8 scaleAnmTypeX;
@@ -446,7 +447,7 @@ struct JPA_ESP1 {
     f32 rotateSpeedRandom;
     f32 rotateDirection;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_ESP1, isEnableScale,isDiffXY,scaleAnmTypeX,scaleAnmTypeY,isEnableRotate, isEnableSinWave, isEnableAlpha,pivotX,pivotY,scaleInTiming,scaleOutTiming,scaleInValueX,scaleOutValueX,scaleInValueY,scaleOutValueY,scaleOutRandom,scaleAnmMaxFrameX,scaleAnmMaxFrameY,alphaInTiming,alphaOutTiming,alphaInValue,alphaBaseValue,alphaOutValue,alphaWaveRandom,alphaWaveFrequency,alphaWaveAmplitude,rotateAngle,rotateAngleRandom,rotateSpeed,rotateSpeedRandom,rotateDirection);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_ESP1, origFlags, isEnableScale,isDiffXY,scaleAnmTypeX,scaleAnmTypeY,isEnableRotate, isEnableSinWave, isEnableAlpha,pivotX,pivotY,scaleInTiming,scaleOutTiming,scaleInValueX,scaleOutValueX,scaleInValueY,scaleOutValueY,scaleOutRandom,scaleAnmMaxFrameX,scaleAnmMaxFrameY,alphaInTiming,alphaOutTiming,alphaInValue,alphaBaseValue,alphaOutValue,alphaWaveRandom,alphaWaveFrequency,alphaWaveAmplitude,rotateAngle,rotateAngleRandom,rotateSpeed,rotateSpeedRandom,rotateDirection);
 
 // Extra Texture Block
 struct JPA_ETX1 {
@@ -460,6 +461,7 @@ struct JPA_ETX1 {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_ETX1, indTextureMode, floats, indTextureID, scale, unk, secondTextureID);
 // Child Shape Block
 struct JPA_SSP1 {
+    u32 origFlags;
     bool isInheritedScale;
     bool isInheritedRGB;
     bool isInheritedAlpha;
@@ -489,7 +491,7 @@ struct JPA_SSP1 {
     u8 texIdx;
     u16 rotateSpeed;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_SSP1, isInheritedScale, isInheritedRGB, isInheritedAlpha, isEnableAlphaOut, isEnableField, isEnableRotate, isEnableScaleOut, shapeType, dirType, rotType, planeType, posRndm, baseVel, baseVelRndm, velInfRate, gravity, globalScale2D, inheritScale, inheritAlpha, inheritRGB, colorPrm, colorEnv, timing, life, rate, step, texIdx, rotateSpeed);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(JPA_SSP1, origFlags, isInheritedScale, isInheritedRGB, isInheritedAlpha, isEnableAlphaOut, isEnableField, isEnableRotate, isEnableScaleOut, shapeType, dirType, rotType, planeType, posRndm, baseVel, baseVelRndm, velInfRate, gravity, globalScale2D, inheritScale, inheritAlpha, inheritRGB, colorPrm, colorEnv, timing, life, rate, step, texIdx, rotateSpeed);
 // Field Block
 struct JPA_FLD1 {
     u32 origFlags;
